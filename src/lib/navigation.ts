@@ -13,41 +13,41 @@ const allDocs = getAllDocs();
 //     href: `/${doc.slug}`,
 //   }));
 
-const configuration = allDocs
-  .filter((doc) => doc.section === "Configuration")
-  .map((doc) => ({
-    title: doc.title,
-    href: `/${doc.slug}`,
-  }));
+// const configuration = allDocs
+//   .filter((doc) => doc.section === "Configuration")
+//   .map((doc) => ({
+//     title: doc.title,
+//     href: `/${doc.slug}`,
+//   }));
 
-const svelteSimpleFormDocs = allDocs
-  .filter((doc) => doc.section === "Svelte Simple Form")
-  .map((doc) => ({
-    title: doc.title,
-    href: `/${doc.slug}`,
-  }));
+// const svelteSimpleFormDocs = allDocs
+//   .filter((doc) => doc.section === "Svelte Simple Form")
+//   .map((doc) => ({
+//     title: doc.title,
+//     href: `/${doc.slug}`,
+//   }));
 //   .reverse();
 
-const svelteSimpleQueryDocs = allDocs
-  .filter((doc) => doc.section === "Svelte Simple Query")
-  .map((doc) => ({
-    title: doc.title,
-    href: `/${doc.slug}`,
-  }))
-  .reverse();
+// const svelteSimpleQueryDocs = allDocs
+//   .filter((doc) => doc.section === "Svelte Simple Query")
+//   .map((doc) => ({
+//     title: doc.title,
+//     href: `/${doc.slug}`,
+//   }))
+//   .reverse();
 
-const svelteSimpleLangDocs = allDocs
-  .filter((doc) => doc.section === "Svelte Simple Lang")
-  .map((doc) => ({
-    title: doc.title,
-    href: `/${doc.slug}`,
-  }))
-  .reverse();
+// const svelteSimpleLangDocs = allDocs
+//   .filter((doc) => doc.section === "Svelte Simple Lang")
+//   .map((doc) => ({
+//     title: doc.title,
+//     href: `/${doc.slug}`,
+//   }))
+//   .reverse();
 
 export const navigation = defineNavigation({
   anchors: [
     {
-      title: "Introduction",
+      title: "Welcome",
       href: "/",
       icon: ChalkboardTeacher,
     },
@@ -65,15 +65,40 @@ export const navigation = defineNavigation({
   sections: [
     {
       title: "Svelte Simple Form",
-      items: svelteSimpleFormDocs,
+      items: [
+        {
+          title: "Introduction",
+          href: "/svelte-simple-form/introduction",
+        },
+        {
+          title: "Installation",
+          href: "/svelte-simple-form/installation",
+        },
+        {
+          title: "Usage",
+          href: "/svelte-simple-form/usage",
+        },
+        {
+          title: "Examples - WIP",
+          //   href: "/svelte-simple-form/examples",
+        },
+      ],
     },
     {
       title: "Svelte Simple Query",
-      items: svelteSimpleQueryDocs,
+      items: [
+        {
+          title: "WIP",
+        },
+      ],
     },
     {
       title: "Svelte Simple Lang",
-      items: svelteSimpleLangDocs,
+      items: [
+        {
+          title: "WIP",
+        },
+      ],
     },
   ],
 });
