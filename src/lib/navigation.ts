@@ -1,0 +1,79 @@
+import { defineNavigation } from "@svecodocs/kit";
+import ChalkboardTeacher from "phosphor-svelte/lib/ChalkboardTeacher";
+import RocketLaunch from "phosphor-svelte/lib/RocketLaunch";
+import Tag from "phosphor-svelte/lib/Tag";
+import { getAllDocs } from "./utils.js";
+
+const allDocs = getAllDocs();
+
+// const components = allDocs
+//   .filter((doc) => doc.section === "Components")
+//   .map((doc) => ({
+//     title: doc.title,
+//     href: `/${doc.slug}`,
+//   }));
+
+const configuration = allDocs
+  .filter((doc) => doc.section === "Configuration")
+  .map((doc) => ({
+    title: doc.title,
+    href: `/${doc.slug}`,
+  }));
+
+const svelteSimpleFormDocs = allDocs
+  .filter((doc) => doc.section === "Svelte Simple Form")
+  .map((doc) => ({
+    title: doc.title,
+    href: `/${doc.slug}`,
+  }));
+//   .reverse();
+
+const svelteSimpleQueryDocs = allDocs
+  .filter((doc) => doc.section === "Svelte Simple Query")
+  .map((doc) => ({
+    title: doc.title,
+    href: `/${doc.slug}`,
+  }))
+  .reverse();
+
+const svelteSimpleLangDocs = allDocs
+  .filter((doc) => doc.section === "Svelte Simple Lang")
+  .map((doc) => ({
+    title: doc.title,
+    href: `/${doc.slug}`,
+  }))
+  .reverse();
+
+export const navigation = defineNavigation({
+  anchors: [
+    {
+      title: "Introduction",
+      href: "/",
+      icon: ChalkboardTeacher,
+    },
+    // {
+    //   title: "Getting Started",
+    //   href: "/getting-started",
+    //   icon: RocketLaunch,
+    // },
+    // {
+    // 	title: "Releases",
+    // 	href: "https://github.com/svecosystem/svecodocs/releases",
+    // 	icon: Tag,
+    // },
+  ],
+  sections: [
+    {
+      title: "Svelte Simple Form",
+      items: svelteSimpleFormDocs,
+    },
+    {
+      title: "Svelte Simple Query",
+      items: svelteSimpleQueryDocs,
+    },
+    {
+      title: "Svelte Simple Lang",
+      items: svelteSimpleLangDocs,
+    },
+  ],
+});
