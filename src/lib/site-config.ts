@@ -2,7 +2,7 @@ import { defineSiteConfig } from "@svecodocs/kit";
 
 export const siteConfig = defineSiteConfig({
   name: "Svelte Simple *",
-  url: "https://svelte-simple.pages.dev",
+  url: "https://svelte-simple.harryhdt.dev",
   //   ogImage: {
   //     url: "https://harryhdt.dev/favicon.png",
   //     height: "630",
