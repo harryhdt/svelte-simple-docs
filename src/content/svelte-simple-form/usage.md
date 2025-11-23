@@ -4,6 +4,30 @@ description: Usage of Svelte Simple Form
 section: Svelte Simple Form
 ---
 
+```typescript
+import { useForm } from "svelte-simple-form";
+
+const { form } = useForm({
+  initialValues: {
+    name: "John",
+    email: "",
+    age: 10,
+    hobbies: [],
+    address: { country: "", zipCode: "" },
+  },
+  onSubmit: async (values) => {
+    console.log(values);
+  },
+});
+
+// form.data
+// form.errors
+// form.isDirty
+// form.isSubmitting
+// form.submit()
+// ...
+```
+
 ## 🎯 `useForm<T>(props: FormProps<T>)`
 
 Creates and returns the reactive `form` object managing form state and events.
