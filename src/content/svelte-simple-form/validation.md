@@ -39,6 +39,7 @@ onChange: (field) => {
   else form.removeError(field);
   if (field === 'password') {
     const newField = 'confirmPassword';
+    if (!form.touched.confirmPassword) return;
     const err = validator.validateField(newField, form.data);
     if (err) form.setError(newField, err);
     else form.removeError(newField);
