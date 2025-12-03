@@ -83,8 +83,12 @@ export const navigation = defineNavigation({
           href: "/svelte-simple-form/validation",
         },
         {
+          title: "Form actions",
+          href: "/svelte-simple-form/form-actions",
+        },
+        {
           title: "Examples - WIP",
-          //   href: "/svelte-simple-form/examples",
+          href: "/svelte-simple-form/examples",
         },
       ],
     },
