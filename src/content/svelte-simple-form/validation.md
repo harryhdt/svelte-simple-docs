@@ -4,6 +4,51 @@ description: Validation of Svelte Simple Form
 section: Svelte Simple Form
 ---
 
+The core idea of validation in this library is simple,
+
+You handle validation inside **onChange** and **onSubmit**, right before performing any API action.  
+Of course, you are fully free to customize the behavior however you like.
+
+```ts
+...
+onChange: (field) => {
+  const err = validator.validateField(field, form.data);
+  if (err) form.setError(field, err);
+  else form.removeError(field);
+},
+...
+onSubmit: async (values) => {
+  const errors = validator.validateForm(values);
+  if (Object.keys(errors).length) {
+    form.errors = errors;
+    return;
+  }
+  ...
+  // API Action
+  ...
+}
+...
+```
+
+You can also trigger validation for additional fields inside onChange when needed:
+
+```ts
+onChange: (field) => {
+  const err = validator.validateField(field, form.data);
+  if (err) form.setError(field, err);
+  else form.removeError(field);
+  if (field === 'password') {
+    const newField = 'confirmPassword';
+    const err = validator.validateField(newField, form.data);
+    if (err) form.setError(newField, err);
+    else form.removeError(newField);
+  }
+},
+```
+
+This approach gives you full control over how validation works — no restrictions, no enforced rules.
+You decide the logic. You stay in control.
+
 You can use **any validation library** you like — or even write your own manually.  
 Below are **two examples**:
 
