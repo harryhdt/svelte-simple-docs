@@ -90,6 +90,10 @@ export const navigation = defineNavigation({
           title: "Examples - WIP",
           href: "/svelte-simple-form/examples",
         },
+        {
+          title: "Breaking changes",
+          href: "/svelte-simple-form/breaking-changes",
+        },
       ],
     },
     {
