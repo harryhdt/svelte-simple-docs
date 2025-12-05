@@ -91,8 +91,8 @@ export const navigation = defineNavigation({
           href: "/svelte-simple-form/examples",
         },
         {
-          title: "Breaking changes",
-          href: "/svelte-simple-form/breaking-changes",
+          title: "Releases 0.3.0",
+          href: "/svelte-simple-form/releases-0.3.0",
         },
       ],
     },
