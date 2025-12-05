@@ -4,181 +4,110 @@ description: Validation of Svelte Simple Form
 section: Svelte Simple Form
 ---
 
-The core idea of validation in this library is simple,
+Svelte Simple Form provides a flexible validation system that works on two levels:
 
-You handle validation inside **onChange** and **onSubmit**, right before performing any API action.  
-Of course, you are fully free to customize the behavior however you like.
+- **Field validation** — runs when a specific field changes or loses focus
+- **Form validation** — runs before submit to validate all fields at once
 
-```ts
-...
-onChange: (field) => {
-  const err = validator.validateField(field, form.data);
-  if (err) form.setError(field, err);
-  else form.removeError(field);
-},
-...
-onSubmit: async (values) => {
-  const errors = validator.validateForm(values);
-  if (Object.keys(errors).length) {
-    form.errors = errors;
-    return;
-  }
-  ...
-  // API Action
-  ...
-}
-...
-```
-
-You can also trigger validation for additional fields inside onChange when needed:
+A validator must provide two functions:
 
 ```ts
-onChange: (field) => {
-  const err = validator.validateField(field, form.data);
-  if (err) form.setError(field, err);
-  else form.removeError(field);
-  if (field === 'password') {
-    const newField = 'confirmPassword';
-    if (!form.touched.confirmPassword) return;
-    const err = validator.validateField(newField, form.data);
-    if (err) form.setError(newField, err);
-    else form.removeError(newField);
-  }
+validator: {
+  validateField(field, form) {
+    // Validate single field
+    // Use form.setError(field, errors)
+    // or form.removeError(field)
+  },
+  validateForm(form) {
+    // Validate all fields
+    // Use form.setErrors(allErrors)
+  },
 },
 ```
 
-This approach gives you full control over how validation works — no restrictions, no enforced rules.
-You decide the logic. You stay in control.
+Validation results are applied using:
 
-You can use **any validation library** you like — or even write your own manually.  
-Below are **two examples**:
+- `form.setError(field, errors)` → set errors for a single field
+- `form.removeError(field)` → clear errors for a single field
+- `form.setErrors(errors)` → set all errors at once
 
-1. Manual validation
-2. Zod validation
+### Examples
 
-Use whichever matches your project needs.
+We have two example of validator
 
----
+#### 1. Zod
 
-## 1. Manual Validation
+Use a Zod schema to validate form input, here is basic example of `zodValidator`.
 
-### Manual Validator Function
+Validator function `zod.ts`:
 
 ```ts
-export function manualValidator(
-  rules: Record<
-    string,
-    (value: any, values: any) => string[] | string | undefined
-  >
+import type { FormContext } from "svelte-simple-form";
+import type { ZodType } from "zod";
+
+export function zodValidator<T extends ZodType<any>>(
+  schema: T,
+  options:
+    | {
+        dependencies?: Partial<Record<string, string[]>>;
+      }
+    | undefined = undefined
 ) {
+  function mapErrors(values: any) {
+    const res = schema.safeParse(values);
+    if (res.success) return {};
+    const errors: Record<string, string[]> = {};
+    for (const issue of res.error.issues) {
+      const key = issue.path.join(".") || "_form";
+      (errors[key] ??= []).push(issue.message);
+    }
+    return errors;
+  }
+
   return {
-    validateForm(values: any) {
-      const errors: Record<string, string[]> = {};
-
-      for (const field in rules) {
-        const res = rules[field](values[field], values);
-
-        if (res) {
-          errors[field] = Array.isArray(res) ? res : [res];
+    validateForm(form: FormContext) {
+      form.setErrors({});
+      const errors = mapErrors(form.data);
+      if (Object.keys(errors).length) {
+        form.setErrors(errors);
+        return false;
+      } else {
+        return true;
+      }
+    },
+    validateField(field: string, form: FormContext) {
+      const allErrors = mapErrors(form.data);
+      const deps = options?.dependencies?.[field] ?? [];
+      const fieldsToCheck = [field, ...deps];
+      let valid = true;
+      for (const key of fieldsToCheck) {
+        if (!form.touched[key]) continue;
+        const errs = allErrors[key];
+        if (errs && errs.length > 0) {
+          valid = false;
+          form.setError(key, errs);
+        } else {
+          form.removeError(key);
         }
       }
-
-      return errors;
-    },
-
-    validateField(field: string, values: any) {
-      const rule = rules[field];
-      if (!rule) return undefined;
-
-      const res = rule(values[field], values);
-      if (!res) return undefined;
-
-      return Array.isArray(res) ? res : [res];
+      return valid;
     },
   };
 }
 ```
 
-### Usage of Manual validator
+> This is a very simple example validator for Zod.
+> <br>
+> It validates the whole form even when only `one field` changes, so it may not be the most efficient solution for `large forms`.
+> <br>
+> You are welcome to create a more `optimized` version
 
-```ts
-const validator = manualValidator({
-  name: (v) => {
-    if (!v) return "Name is required";
-    if (v.length < 1) return "Name is required";
-  },
-  email: (v) => {
-    if (!v) return "Email is required";
-    if (!v.includes("@")) return "Invalid email address";
-  },
-  age: (v) => {
-    if (!v) return "Age is required";
-    if (v < 18) return "Must be at least 18";
-  },
-});
-
-const { form } = useForm({
-  initialValues: { name: "John", email: "", age: 10 },
-
-  onChange: (field) => {
-    const err = validator.validateField(field, form.data);
-    if (err) form.setError(field, err);
-    else form.removeError(field);
-  },
-
-  onSubmit: async (values) => {
-    const errors = validator.validateForm(values);
-    if (Object.keys(errors).length) {
-      form.errors = errors;
-      return;
-    }
-
-    console.log("submitted", values);
-  },
-});
-
-// FYI: form.reset() resets all values AND errors
-```
-
----
-
-## 2. Zod Validation
-
-### Zod Validator Function
-
-```ts
-import type { ZodTypeAny } from "zod";
-
-export function zodValidator(schema: ZodTypeAny) {
-  return {
-    validateForm(values: any) {
-      const res = schema.safeParse(values);
-      if (res.success) return {};
-
-      const errors: Record<string, string[]> = {};
-
-      for (const issue of res.error.issues) {
-        const key = issue.path.join(".") || "_form";
-        if (!errors[key]) errors[key] = [];
-        errors[key].push(issue.message);
-      }
-
-      return errors;
-    },
-
-    validateField(field: string, values: any) {
-      const allErrors = this.validateForm(values);
-      return allErrors[field];
-    },
-  };
-}
-```
-
-### Usage
+Usage example:
 
 ```ts
 const schema = z
   .object({
+    name: z.string().min(1, "Required"),
     password: z.string().min(6, "Min 6 chars"),
     confirmPassword: z.string().min(6, "Min 6 chars"),
   })
@@ -187,47 +116,146 @@ const schema = z
     path: ["confirmPassword"],
   });
 
-const validator = zodValidator(schema);
-
 const { form } = useForm({
-  initialValues: { password: "", confirmPassword: "" },
-
-  onChange: (field) => {
-    const err = validator.validateField(field, form.data);
-    if (err) form.setError(field, err);
-    else form.removeError(field);
-
-    // Revalidate confirmPassword when password changes
-    if (field === "password") {
-      const related = "confirmPassword";
-      const err = validator.validateField(related, form.data);
-      if (err) form.setError(related, err);
-      else form.removeError(related);
-    }
-  },
-
+  initialValues: { name: "", password: "", confirmPassword: "" },
+  validator: zodValidator(schema, {
+    dependencies: {
+      password: ["confirmPassword"],
+      confirmPassword: ["password"],
+    },
+  }),
   onSubmit: async (values) => {
-    const errors = validator.validateForm(values);
-    if (Object.keys(errors).length) {
-      form.errors = errors;
-      return;
-    }
-
     console.log("submitted", values);
   },
 });
 ```
 
+> 💡 Use dependencies to revalidate related fields
+> (e.g. password + confirmPassword)
+
+#### 2. Manual
+
+Define your own validation rules using simple functions, here is basic example of `manualValidator`.
+
+Validator function `manual.ts`:
+
+```ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { FormContext } from "svelte-simple-form";
+
+export function manualValidator<
+  T extends Record<string, (value: any, allValues: any) => string | undefined>
+>(
+  rules: T,
+  options?:
+    | {
+        dependencies?: Partial<Record<keyof T & string, (keyof T & string)[]>>;
+      }
+    | undefined
+) {
+  function mapErrors(values: any) {
+    const errors: Record<string, string[]> = {};
+
+    for (const key in rules) {
+      const rule = rules[key];
+      const message = rule(values[key], values);
+      if (message) {
+        (errors[key] ??= []).push(message);
+      }
+    }
+
+    return errors;
+  }
+
+  return {
+    validateForm(form: FormContext) {
+      form.setErrors({});
+      const errors = mapErrors(form.data);
+      if (Object.keys(errors).length) {
+        form.setErrors(errors);
+        return false;
+      }
+      return true;
+    },
+
+    validateField(field: string, form: FormContext) {
+      const allErrors = mapErrors(form.data);
+      const deps = options?.dependencies?.[field] ?? [];
+      const fieldsToCheck = [field, ...deps];
+
+      let valid = true;
+
+      for (const key of fieldsToCheck) {
+        if (!form.touched[key]) continue;
+
+        const errs = allErrors[key];
+        if (errs && errs.length > 0) {
+          valid = false;
+          form.setError(key, errs);
+        } else {
+          form.removeError(key);
+        }
+      }
+
+      return valid;
+    },
+  };
+}
+```
+
+Usage example:
+
+```ts
+const { form } = useForm({
+  initialValues: { name: "", password: "", confirmPassword: "" },
+  validator: manualValidator(
+    {
+      name: (v) => {
+        if (!v) return "Required";
+        if (v.length < 1) return "Required";
+      },
+      password: (v) => {
+        if (!v) return "Required";
+        if (v.length < 6) return "Min 6 chars";
+      },
+      confirmPassword: (v, all) => {
+        if (!v) return "Required";
+        if (v !== all.password) return "Passwords do not match";
+      },
+    },
+    {
+      dependencies: {
+        password: ["confirmPassword"],
+        confirmPassword: ["password"],
+      },
+    }
+  ),
+  onSubmit: async (values) => {
+    console.log("submitted", values);
+  },
+});
+```
+
+This is great if you don’t want to rely on an external library.
+
 ---
 
-## Create Your Own Validator
+### Use with Other Validation Libraries
 
-You are free to build validators using any library such as:
+The validator API is fully flexible.
+You can integrate any validation library — such as:
 
-- Zod
 - Yup
+- Superstruct
+- Vest
 - Valibot
-- Etc
-- or your own custom logic
+- Joi (browser compatible versions)
+- etc.
 
-Your form flow will still work the same, also you already know the logic.
+All you need to do is:
+
+1. Parse your form data using the library’s validation method
+2. Convert the validation result to a simple error map
+3. Update the form using form.setError, form.removeError, or form.setErrors
+
+This means you are free to choose (or build) the validation strategy that fits your needs.
