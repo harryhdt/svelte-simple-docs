@@ -61,6 +61,7 @@ Creates and returns the reactive `form` object managing form state and events.
     reset(): void;
     resetField(field: Path<T>): void;
 
+    setErrors(errors: Record<Path<T>, string[]>): void;
     setError(field: Path<T>, error: string | string[]): void;
 	removeError(field: Path<T>): void;
 
@@ -99,14 +100,22 @@ Creates and returns the reactive `form` object managing form state and events.
 - Reset a single field (and its nested children) to its initial value.
 - Clears touched state for the reset field.
 
+`setErrors(errors: Record<Path<T>, string[]>)`
+
+- Replace all current errors with the given error map.
+- Mostly used by full-form validation (e.g. schema validation on submit).
+
 `setError(field: Path<T>, error: string | string[])`
 
-- Manually set an error for a specific field.
-- Like server from check email really exit in db
+- Set an error for a specific field manually.
+- Useful for server-side validation (e.g. “email already exists”).
+- Does not affect other fields’ errors.
 
 `removeError(field: Path<T>)`
 
-- Manually remove an error from a specific field.
+- Remove error from a specific field manually.
+- Ideal after a previously invalid field becomes valid again.
+- Does not change other errors.
 
 `submit(callback?: (data: T) => any)`
 
@@ -171,7 +180,7 @@ Creates and returns the reactive `form` object managing form state and events.
 - `onChange` is triggered for every changed field with path and new value, you can use it for validate field.
 - Use `form.isDirty` to track if the user has modified the form.
 - `resetField` allows fine-grained reset of individual nested fields.
-- `setError` and `removeError` allows manual setting of errors for specific fields.
+- `setError` and `removeError` allows manual setting of error for specific field.
 - Use `form.handler` directive to bind submit event easily.
 - Use `form.{state} = value` for manually change state value
 - Use `form.{data|errors|touched}.{field} = value` for manually change state field value
