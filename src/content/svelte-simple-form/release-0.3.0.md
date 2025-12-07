@@ -1,6 +1,6 @@
 ---
-title: Releases
-description: Releases of Svelte Simple Form
+title: Release 0.3.0
+description: Release version 0.3.0 of Svelte Simple Form
 section: Svelte Simple Form
 ---
 

@@ -70,10 +70,10 @@ export const navigation = defineNavigation({
           title: "Introduction",
           href: "/svelte-simple-form/introduction",
         },
-        {
-          title: "Installation",
-          href: "/svelte-simple-form/installation",
-        },
+        // {
+        //   title: "Installation",
+        //   href: "/svelte-simple-form/installation",
+        // },
         {
           title: "Usage",
           href: "/svelte-simple-form/usage",
@@ -91,8 +91,12 @@ export const navigation = defineNavigation({
           href: "/svelte-simple-form/examples",
         },
         {
-          title: "Releases 0.3.0",
-          href: "/svelte-simple-form/releases-0.3.0",
+          title: "Releases",
+          href: "/svelte-simple-form/releases",
+        },
+        {
+          title: "Releases 0.3.1 (Latest)",
+          href: "/svelte-simple-form/release-0.3.1",
         },
       ],
     },

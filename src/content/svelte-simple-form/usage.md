@@ -4,7 +4,7 @@ description: Usage of Svelte Simple Form
 section: Svelte Simple Form
 ---
 
-```typescript
+```ts
 import { useForm } from "svelte-simple-form";
 
 const { form } = useForm({
@@ -28,18 +28,15 @@ const { form } = useForm({
 // ...
 ```
 
-## 🎯 `useForm<T>(props: FormProps<T>)`
-
-Creates and returns the reactive `form` object managing form state and events.
-
 ### Parameters
 
-| Name            | Type                    | Description                         |
-| --------------- | ----------------------- | ----------------------------------- |
-| `initialValues` | `T` Automatically       | Initial values for the form fields. |
-| `onSubmit`      | Optional async callback | Called on successful submission.    |
-| `onChange`      | Optional callback       | Called on any field update.         |
-| `onReset`       | Optional callback       | Called when form resets.            |
+| Name            | Type                    | Description                                                                                                             |
+| --------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `initialValues` | `T` Automatically       | Initial values for the form fields.                                                                                     |
+| `onSubmit`      | Optional async callback | Called on successful submission.                                                                                        |
+| `onChange`      | Optional callback       | Called on any field update.                                                                                             |
+| `onReset`       | Optional callback       | Called when form resets.                                                                                                |
+| `validator`     | Optional object         | Validator object implementing `validateField` and `validateForm`. Used to handle field-level and form-level validation. |
 
 ### Returns
 
@@ -50,6 +47,7 @@ Creates and returns the reactive `form` object managing form state and events.
     data: T;
     errors: Record<Path<T>, string[] | undefined>;
     isValid: boolean;
+    isValidating: boolean;
     isSubmitting: boolean;
     isDirty: boolean;
     touched: Record<Path<T>, boolean | undefined>;
@@ -57,11 +55,13 @@ Creates and returns the reactive `form` object managing form state and events.
     setInitialValues(values: T, options?: { reset?: boolean }): void;
     setIsDirty(dirty?: boolean): void;
     setIsSubmitting(submitting?: boolean): void;
+    setIsValid(valid?: boolean): void;
+    setIsValidating(validating?: boolean): void;
 
     reset(): void;
     resetField(field: Path<T>): void;
 
-    setErrors(errors: Record<Path<T>, string[]>): void;
+    setErrors(errors: Record<Path<T>, string[] | undefined>): void;
     setError(field: Path<T>, error: string | string[]): void;
 	removeError(field: Path<T>): void;
 
@@ -74,7 +74,7 @@ Creates and returns the reactive `form` object managing form state and events.
 
 ---
 
-## 🛠️ Methods & Usage Details
+## Methods & Usage Details
 
 `setInitialValues(values: T, options?: { reset?: boolean })`
 
@@ -129,20 +129,21 @@ Creates and returns the reactive `form` object managing form state and events.
 
 ---
 
-## 💡 Reactive State (Bind these in your Svelte components)
+## Reactive State (can bind these in your Svelte components)
 
-| Property            | Type                                     | Description                                    |     |
-| ------------------- | ---------------------------------------- | ---------------------------------------------- | --- |
-| `form.data`         | `T`                                      | Current form data, bind inputs here.           |     |
-| `form.errors`       | `Record<Path<T>, string[] or undefined>` | Validation errors keyed by path.               |
-| `form.isValid`      | `boolean`                                | True if form has no validation errors.         |     |
-| `form.isSubmitting` | `boolean`                                | True if form is currently submitting.          |     |
-| `form.isDirty`      | `boolean`                                | True if form data differs from initial values. |     |
-| `form.touched`      | `Record\<Path<T>, boolean or undefined>` | Tracks which fields have been modified.        |
+| Property            | Type                                     | Description                                             |
+| ------------------- | ---------------------------------------- | ------------------------------------------------------- |
+| `form.data`         | `T`                                      | Current form data, bind inputs here.                    |
+| `form.errors`       | `Record<Path<T>, string[] or undefined>` | Validation errors keyed by path.                        |
+| `form.isValid`      | `boolean`                                | True if form has no validation errors.                  |
+| `form.isValidating` | `boolean`                                | True if the form is currently running async validation. |
+| `form.isSubmitting` | `boolean`                                | True if form is currently submitting.                   |
+| `form.isDirty`      | `boolean`                                | True if form data differs from initial values.          |
+| `form.touched`      | `Record\<Path<T>, boolean or undefined>` | Tracks which fields have been modified.                 |
 
 ---
 
-## 🧑‍💻 Example Usage
+## Example Usage
 
 ```svelte
 <script lang="ts">
@@ -172,7 +173,7 @@ Creates and returns the reactive `form` object managing form state and events.
 </form>
 ```
 
-## 💬 Tips & Notes
+## Tips & Notes
 
 - Designed specifically for **Svelte 5**, leveraging its reactive primitives (`$state`, `$effect`, `tick`).
 - Supports deeply nested objects and arrays with full type safety via `Path<T>`.
